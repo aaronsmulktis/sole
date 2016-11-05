@@ -22,3 +22,6 @@ http
 accounts-password
 accounts-ui
 msavin:mongol
+
+chfritz:easycron
+momentjs:moment

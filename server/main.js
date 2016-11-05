@@ -1,29 +1,20 @@
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
+// import twilio from 'twilio';
 
-console.log(process.env);
+// console.log(process.env);
 
 const TWILIO_AUTH_TOKEN = Meteor.settings.TWILIO_AUTH_TOKEN,
       TWILIO_ACCOUNT_SID = Meteor.settings.TWILIO_ACCOUNT_SID,
       TWILIO_NUMBER = Meteor.settings.TWILIO_NUMBER;
+
+const twilio = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 Meteor.publish("groups", function () {
   return Groups.find({
     owner: this.userId
   });
 });
-
-// Configure Accounts to require username instead of email
-// Accounts.ui.config({
-//   // requestPermissions: {
-//   //   facebook: ['user_likes'],
-//   //   github: ['user', 'repo']
-//   // },
-//   // requestOfflineToken: {
-//   //   google: true
-//   // },
-//   passwordSignupFields: 'USERNAME_ONLY'
-// });
 
 Meteor.methods({
   addGroup: function (name) {
@@ -95,33 +86,70 @@ Meteor.methods({
     var uniquePhoneBook = new Set(phonebook);
     // Use Twilio REST API to text each number in the unique phonebook
     uniquePhoneBook.forEach(function (number) {
-        HTTP.call(
-            "POST",
-            'https://api.twilio.com/2010-04-01/Accounts/' +
-            TWILIO_ACCOUNT_SID + '/SMS/Messages.json', {
-                params: {
-                    From: TWILIO_NUMBER,
-                    To: number,
-                    Body: outgoingMessage
-                },
-                // Set your credentials as environment variables
-                // so that they are not loaded on the client
-                auth:
-                    TWILIO_ACCOUNT_SID + ':' +
-                    TWILIO_AUTH_TOKEN
-            },
-            // Print error or success to console
-            function (error) {
-                if (error) {
-                    console.log(error);
-                }
-                else {
-                    console.log('SMS sent successfully.');
-                }
+        // HTTP.call(
+        //     "POST",
+        //     'https://api.twilio.com/2010-04-01/Accounts/' +
+        //     TWILIO_ACCOUNT_SID + '/SMS/Messages.json', {
+        //         params: {
+        //             From: TWILIO_NUMBER,
+        //             To: number,
+        //             Body: outgoingMessage
+        //         },
+        //         // Set your credentials as environment variables
+        //         // so that they are not loaded on the client
+        //         auth:
+        //             TWILIO_ACCOUNT_SID + ':' +
+        //             TWILIO_AUTH_TOKEN
+        //     },
+        //     // Print error or success to console
+        //     function (error) {
+        //         if (error) {
+        //           console.log(error);
+        //         } else {
+        //           console.log('SMS sent successfully.');
+        //         }
+        //     }
+        // );
+        twilio.sendMessage({
+            to: number,
+            from: TWILIO_NUMBER,
+            body: outgoingMessage
+
+        }, function(err, responseData) {
+
+            if (!err) {
+                // "responseData" is a JavaScript object containing data received from Twilio.
+                // A sample response from sending an SMS message is here (click "JSON" to see how the data appears in JavaScript):
+                // http://www.twilio.com/docs/api/rest/sending-sms#example-1
+                console.log(responseData.from); // outputs "+14506667788"
+                console.log(responseData.body); // outputs "word to your mother."
+
             }
-        );
+        });
+
     });
+  },
+  checkMessages: function (incomingMessages) {
+    var messages = [];
+
+    HTTP.call(
+      "GET",
+      'https://demo.twilio.com/welcome/sms/reply/',
+      function (error, response) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log(response);
+        }
+      }
+    );
   }
+});
+
+let everyHour = new Cron(function() {
+  Meteor.call("checkMessages");
+}, {
+  minute: 5
 });
 
 Meteor.startup(() => {
