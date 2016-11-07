@@ -26,11 +26,8 @@ msavin:mongol
 chfritz:easycron
 momentjs:moment
 
-react
-react-runtime@=0.14.3
 twbs:bootstrap
 less
-kadira:react-layout
 fortawesome:fontawesome
 underscore
 kadira:flow-router
@@ -47,3 +44,5 @@ kadira:debug
 jazeee:spiderable-longer-timeout
 meteorhacks:subs-manager
 kadira:dochead
+meteorhacks:picker
+kadira:blaze-layout

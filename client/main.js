@@ -7,6 +7,8 @@ import './main.html';
 Meteor.subscribe("groups");
 Meteor.subscribe("messages");
 
+BlazeLayout.setRoot('body');
+
 Template.body.helpers({
   groups: function () {
     // Find all groups and list the newest groups first
