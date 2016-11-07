@@ -88,7 +88,7 @@ Meteor.methods({
     });
     // Place all numbers in a Set so no number is texted more than once
     var uniquePhoneBook = new Set(phonebook);
-    // Use Twilio REST API to text each number in the unique phonebook
+
     uniquePhoneBook.forEach(function (number, options) {
       try {
         var result = twilio.sendMessage({
@@ -96,13 +96,14 @@ Meteor.methods({
           from: TWILIO_NUMBER,
           body: outgoingMessage
         });
+      } catch (err) {
+        throw new Meteor.error(err);
+      } finally {
         result.type = "outgoing";
         var smsId = Messages.insert(result);
         result._id = smsId;
         console.log("New message sent:", result);
         return result;
-      } catch (err) {
-        throw new Meteor.error(err);
       }
     });
   }
@@ -122,18 +123,19 @@ Meteor.startup(() => {
       if (err) {
         console.warn("There was an error getting data from twilio", err);
         return
+      } else {
+        data.messages.forEach(function (message) {
+          if (Messages.find({sid: message.sid}).count() > 0) {
+            return;
+          }
+          if (message.from === Meteor.settings.TWILIO_NUMBER) {
+            message.type = "outgoing";
+          } else {
+            message.type = "incoming";
+          }
+          Messages.insert(message);
+        });
       }
-      data.messages.forEach(function (message) {
-        if (Messages.find({sid: message.sid}).count() > 0) {
-          return;
-        }
-        if (message.from === Meteor.settings.TWILIO_NUMBER) {
-          message.type = "outgoing";
-        } else {
-          message.type = "incoming";
-        }
-        Messages.insert(message);
-      });
     });
   }
 

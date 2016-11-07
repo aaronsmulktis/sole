@@ -52,15 +52,7 @@
   <h4>Message Log</h4>
   <ul>
     {{#each messages}}
-      <li>
-        {{dateCreated}} -
-        {{#if isOutgoing}}
-          You said
-        {{else}}
-          {{from}} said
-        {{/if}}
-        {{body}}
-      </li>
+      {{> message}}
     {{/each}}
   </ul>
 </template>
