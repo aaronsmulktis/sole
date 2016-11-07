@@ -16,6 +16,10 @@ Meteor.publish("groups", function () {
   });
 });
 
+Meteor.publish("messages", function () {
+  return Messages.find({});
+});
+
 Meteor.methods({
   addGroup: function (name) {
     Groups.insert({
@@ -85,64 +89,22 @@ Meteor.methods({
     // Place all numbers in a Set so no number is texted more than once
     var uniquePhoneBook = new Set(phonebook);
     // Use Twilio REST API to text each number in the unique phonebook
-    uniquePhoneBook.forEach(function (number) {
-        // HTTP.call(
-        //     "POST",
-        //     'https://api.twilio.com/2010-04-01/Accounts/' +
-        //     TWILIO_ACCOUNT_SID + '/SMS/Messages.json', {
-        //         params: {
-        //             From: TWILIO_NUMBER,
-        //             To: number,
-        //             Body: outgoingMessage
-        //         },
-        //         // Set your credentials as environment variables
-        //         // so that they are not loaded on the client
-        //         auth:
-        //             TWILIO_ACCOUNT_SID + ':' +
-        //             TWILIO_AUTH_TOKEN
-        //     },
-        //     // Print error or success to console
-        //     function (error) {
-        //         if (error) {
-        //           console.log(error);
-        //         } else {
-        //           console.log('SMS sent successfully.');
-        //         }
-        //     }
-        // );
-        twilio.sendMessage({
-            to: number,
-            from: TWILIO_NUMBER,
-            body: outgoingMessage
-
-        }, function(err, responseData) {
-
-            if (!err) {
-                // "responseData" is a JavaScript object containing data received from Twilio.
-                // A sample response from sending an SMS message is here (click "JSON" to see how the data appears in JavaScript):
-                // http://www.twilio.com/docs/api/rest/sending-sms#example-1
-                console.log(responseData.from);
-                console.log(responseData.body);
-
-            }
+    uniquePhoneBook.forEach(function (number, options) {
+      try {
+        var result = twilio.sendMessage({
+          to: number,
+          from: TWILIO_NUMBER,
+          body: outgoingMessage
         });
-
-    });
-  },
-  checkMessages: function (incomingMessages) {
-    var messages = [];
-
-    HTTP.call(
-      "GET",
-      'https://demo.twilio.com/welcome/sms/reply/',
-      function (error, response) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log(response);
-        }
+        result.type = "outgoing";
+        var smsId = Messages.insert(result);
+        result._id = smsId;
+        console.log("New message sent:", result);
+        return result;
+      } catch (err) {
+        throw new Meteor.error(err);
       }
-    );
+    });
   }
 });
 
@@ -153,5 +115,28 @@ let everyHour = new Cron(function() {
 });
 
 Meteor.startup(() => {
+  var getTwilioMessages = Meteor.wrapAsync(twilio.messages.list, twilio.messages);
 
+  function updateMessages () {
+    getTwilioMessages(function (err, data) {
+      if (err) {
+        console.warn("There was an error getting data from twilio", err);
+        return
+      }
+      data.messages.forEach(function (message) {
+        if (Messages.find({sid: message.sid}).count() > 0) {
+          return;
+        }
+        if (message.from === Meteor.settings.TWILIO_NUMBER) {
+          message.type = "outgoing";
+        } else {
+          message.type = "incoming";
+        }
+        Messages.insert(message);
+      });
+    });
+  }
+
+  updateMessages();
+  Meteor.setInterval(updateMessages, 60000);
 });

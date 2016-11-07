@@ -25,3 +25,25 @@ msavin:mongol
 
 chfritz:easycron
 momentjs:moment
+
+react
+react-runtime@=0.14.3
+twbs:bootstrap
+less
+kadira:react-layout
+fortawesome:fontawesome
+underscore
+kadira:flow-router
+
+arillo:flow-router-helpers
+aldeed:collection2
+
+fastclick
+london:body-class
+velocityjs:velocityjs
+poetic:meteor-velocity-react
+meteorhacks:kadira
+kadira:debug
+jazeee:spiderable-longer-timeout
+meteorhacks:subs-manager
+kadira:dochead

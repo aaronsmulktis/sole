@@ -21,6 +21,9 @@
         {{> group}}
       {{/each}}
     </ul>
+    <div>
+      {{> messageLog}}
+    </div>
   </div>
 </body>
 
@@ -42,5 +45,36 @@
     <form class="new-number">
       <input type="text" name="number" placeholder="Enter a number to add to this group..." />
     </form>
+  </li>
+</template>
+
+<template name="messageLog">
+  <h4>Message Log</h4>
+  <ul>
+    {{#each messages}}
+      <li>
+        {{dateCreated}} -
+        {{#if isOutgoing}}
+          You said
+        {{else}}
+          {{from}} said
+        {{/if}}
+        {{body}}
+      </li>
+    {{/each}}
+  </ul>
+</template>
+
+<template name="message">
+  <li>
+    <button class="delete-group">&times;</button>
+    <span class="text bold">{{name}}</span>
+    {{dateCreated}} -
+    {{#if isOutgoing}}
+      ({{status}}) - You said:
+    {{else}}
+      {{from}} said:
+    {{/if}}
+    <p class="bold">"{{body}}"</p>
   </li>
 </template>
