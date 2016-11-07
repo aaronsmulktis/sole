@@ -7,11 +7,7 @@ App = React.createClass({
       <div id="globalContainer" itemScope itemType="http://schema.org/EntertainmentBusiness">
 
         <div id="globalWrap">
-
-          <div>
-            <Header key={Header} title={this.props.title} />
-          </div>
-
+          
           {this.props.content}
 
         </div>

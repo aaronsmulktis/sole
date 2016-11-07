@@ -61,7 +61,7 @@ HomeWrapper = React.createClass({
     // }
 
     return (
-      <About
+      <Home
         key={Home}
       />
     );

@@ -74,24 +74,26 @@ Meteor.methods({
       );
   },
   sendMessage: function (outgoingMessage) {
-    var phonebook = [];
+    let phonebook = [];
     // Find all checked numbers across all groups
-    var recipients =
+    let recipients =
         Groups.find(
             {numbers: { $elemMatch: {"checked": true}}}
         );
+    console.log(recipients);
     // Add each number from our query to our phonebook
     recipients.forEach(function (recipient) {
         for (var index in recipient.numbers) {
-            phonebook.push(recipient.numbers[index].number);
+          phonebook.push(recipient.numbers[index].number);
         }
     });
+    console.log(phonebook);
     // Place all numbers in a Set so no number is texted more than once
-    var uniquePhoneBook = new Set(phonebook);
+    let uniquePhoneBook = new Set(phonebook);
 
     uniquePhoneBook.forEach(function (number, options) {
       try {
-        var result = twilio.sendMessage({
+        let result = twilio.sendMessage({
           to: number,
           from: TWILIO_NUMBER,
           body: outgoingMessage
@@ -100,7 +102,7 @@ Meteor.methods({
         throw new Meteor.error(err);
       } finally {
         result.type = "outgoing";
-        var smsId = Messages.insert(result);
+        let smsId = Messages.insert(result);
         result._id = smsId;
         console.log("New message sent:", result);
         return result;
@@ -109,14 +111,14 @@ Meteor.methods({
   }
 });
 
-let everyHour = new Cron(function() {
-  Meteor.call("checkMessages");
-}, {
-  minute: 5
-});
+// let everyHour = new Cron(function() {
+//   Meteor.call("checkMessages");
+// }, {
+//   minute: 5
+// });
 
 Meteor.startup(() => {
-  var getTwilioMessages = Meteor.wrapAsync(twilio.messages.list, twilio.messages);
+  let getTwilioMessages = Meteor.wrapAsync(twilio.messages.list, twilio.messages);
 
   function updateMessages () {
     getTwilioMessages(function (err, data) {
