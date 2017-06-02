@@ -3,9 +3,9 @@
   "servers": [
     {
       // (Old) Production
-      "host": "35.162.10.194",
+      //"host": "35.162.10.194",
       // Production
-      //"host": "52.25.50.230",
+      "host": "52.25.50.230",
       // Development
       //"host": "54.71.203.212",
       "username": "ubuntu",

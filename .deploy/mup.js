@@ -19,7 +19,7 @@ module.exports = {
       serverOnly: true
     },
     env: {
-      ROOT_URL: 'sole.thickmaterial.com',
+      ROOT_URL: 'sole.saltea.co',
       MONGO_URL: 'mongodb://localhost/meteor'
     },
 

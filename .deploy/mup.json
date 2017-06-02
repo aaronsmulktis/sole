@@ -33,7 +33,7 @@
   // ROOT_URL must be set to your correct domain (https or http)
   "env": {
     "PORT": 80,
-    "ROOT_URL": "http://sole.thickmaterial.com",
+    "ROOT_URL": "http://sole.saltea.co",
     "CLUSTER_WORKERS_COUNT": "auto"
   },
 
