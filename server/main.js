@@ -20,6 +20,23 @@ Meteor.publish("messages", function () {
   return Messages.find({});
 });
 
+// Server side routes
+Picker.route('/reply', function(params, req, res, next) {
+  req.method == "POST";
+  var twilio = require('twilio');
+  var twiml = new twilio.TwimlResponse();
+  if (req.query.Body == 'hello') {
+    twiml.message('Hi!');
+  } else if(req.query.Body == 'bye') {
+    twiml.message('Goodbye');
+  } else {
+    twiml.message("Wonder what you're gonna say next.");
+  }
+  res.writeHead(200, {'Content-Type': 'text/xml'});
+  res.end(twiml.toString());
+});
+
+// Events and methods
 Meteor.methods({
   addGroup: function (name) {
     Groups.insert({
@@ -108,11 +125,11 @@ Meteor.methods({
   }
 });
 
-let everyHour = new Cron(function() {
-  Meteor.call("checkMessages");
-}, {
-  minute: 5
-});
+// let everyHour = new Cron(function() {
+//   Meteor.call("checkMessages");
+// }, {
+//   minute: 5
+// });
 
 Meteor.startup(() => {
   var getTwilioMessages = Meteor.wrapAsync(twilio.messages.list, twilio.messages);

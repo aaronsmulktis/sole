@@ -26,14 +26,13 @@ msavin:mongol
 chfritz:easycron
 momentjs:moment
 
-react
-react-runtime@=0.14.3
 twbs:bootstrap
 less
-kadira:react-layout
 fortawesome:fontawesome
 underscore
 kadira:flow-router
+meteorhacks:picker
+kadira:blaze-layout
 
 arillo:flow-router-helpers
 aldeed:collection2

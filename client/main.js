@@ -7,7 +7,9 @@ import './main.html';
 Meteor.subscribe("groups");
 Meteor.subscribe("messages");
 
-Template.body.helpers({
+BlazeLayout.setRoot('body');
+
+Template.globalContainer.helpers({
   groups: function () {
     // Find all groups and list the newest groups first
     return Groups.find({}, {sort: {createdAt: -1}});

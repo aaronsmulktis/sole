@@ -2,15 +2,17 @@
   // Server authentication info
   "servers": [
     {
-      // Production
+      // (Old) Production
       "host": "35.162.10.194",
+      // Production
+      //"host": "52.25.50.230",
       // Development
       //"host": "54.71.203.212",
       "username": "ubuntu",
       //"password": "password",
       // or pem file (ssh based authentication)
       // WARNING: Keys protected by a passphrase are not supported
-      "pem": "~/Keys/MacBook.pem"
+      "pem": "~/Keys/saltea-app.pem"
       // Also, for non-standard ssh port use this
       //"sshOptions": { "port" : 49154 },
       // server specific environment variables
@@ -33,7 +35,7 @@
   // ROOT_URL must be set to your correct domain (https or http)
   "env": {
     "PORT": 80,
-    "ROOT_URL": "http://sole.thickmaterial.com",
+    "ROOT_URL": "http://sole.saltea.com",
     "CLUSTER_WORKERS_COUNT": "auto"
   },
 
