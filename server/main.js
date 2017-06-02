@@ -25,14 +25,16 @@ Picker.route('/reply', function(params, req, res, next) {
   req.method == "POST";
   var twilio = require('twilio');
   var twiml = new twilio.TwimlResponse();
-  if (req.query.Body == 'hello') {
+  if (params.query.Body === 'hello') {
     twiml.message('Hi!');
-  } else if(req.query.Body == 'bye') {
+  } else if(params.query.Body === 'bye') {
     twiml.message('Goodbye');
   } else {
     twiml.message("Wonder what you're gonna say next.");
   }
+  // Maybe should be xml?
   res.writeHead(200, {'Content-Type': 'text/xml'});
+  // res.end(twiml.toString());
   res.end(twiml.toString());
 });
 
