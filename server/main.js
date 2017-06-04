@@ -22,24 +22,170 @@ Meteor.publish("messages", function () {
 
 // Server side routes
 Picker.route('/reply', function(params, req, res, next) {
-  req.method == "POST";
+  let incomingMessage = params.query.Body,
+      said = incomingMessage.toLowerCase();
+  //     natural = require('natural'),
+  //     classifier = new natural.BayesClassifier(),
+  //     // classifier = new natural.LogisticRegressionClassifier(),
+  //     tokenizer = new natural.WordTokenizer(),
+  //     tokens = tokenizer.tokenize(said);
+
   var twilio = require('twilio');
   var twiml = new twilio.TwimlResponse();
-  if (params.query.Body === 'hello') {
-    twiml.message('Hi!');
-  } else if(params.query.Body === 'bye') {
-    twiml.message('Goodbye');
-  } else {
-    twiml.message("Wonder what you're gonna say next.");
-  }
+  
+  console.log(said);
+  // let classState = [
+  //   // "wants", "needs", "cans", "musts"
+  // ];
+  // let classActions = [];
+  // let classLocations = [];
+  // let wants = ['can i','want', 'please', 'can', 'will there', 'can he', 'can she'];
+
+  Meteor.call('classifyMessage', said, function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+      if (res === "wants") {
+        // console.log(res);
+        twiml.message("i see you wantin");
+      } else {
+        // console.log(res);
+        Meteor.call("trainNLP", said, function(err, res) {
+          if (err) {
+            throw new Meteor.Error(err);
+          } else {
+            return res
+          }
+        });
+
+        twiml.message("whatevs");
+      }
+    }
+  });
+
+  // natural.BayesClassifier.load('classifier.json', null, function(err, classifier) {
+  //   // console.log(classifier.classify(said));
+  //   messageClass = classifier.classify(said);
+
+  req.method == "POST";
+
   // Maybe should be xml?
   res.writeHead(200, {'Content-Type': 'text/xml'});
-  // res.end(twiml.toString());
   res.end(twiml.toString());
 });
 
 // Events and methods
 Meteor.methods({
+  trainNLP: function(msg) {
+    // console.log(msg);
+    let said = msg,
+        natural = require('natural'),
+        classifier = new natural.BayesClassifier(),
+        // classifier = new natural.LogisticRegressionClassifier(),
+        tokenizer = new natural.WordTokenizer(),
+        tokens = tokenizer.tokenize(said);
+
+    natural.PorterStemmer.attach();
+
+    // Training
+    if (tokens.indexOf("want") !== -1) {
+      classifier.addDocument(msg, 'wants');
+      classifier.train();
+
+      classifier.save('classifier.json', function(err, classifier) {
+        if (err) {
+          throw new Meteor.Error("couldn't save");
+          console.log('it didnt save')
+        } else {
+          return true;
+          console.log(classifier.docs);
+        }
+      });
+      // If you wanna classify each word
+      // tokens.forEach(function(item) {
+      //   // let stem = item.stem();
+      //   // Should conditionally classify the incoming words
+      //   // classIt(stem, )
+
+      // });
+      // twiml.message("you want something");
+
+    } else if (tokens.indexOf("need") !== -1) {
+      classifier.addDocument(msg, 'needs');
+      classifier.train();
+      classifier.save('classifier.json', function(err, classifier) {
+        if (err) {
+          throw new Meteor.Error("couldn't save");
+          console.log('it didnt save')
+        } else {
+          return true;
+          console.log(classifier.docs);
+        }
+      });
+      // If you wanna classify each word
+      // tokens.forEach(function(item) {
+      //   // let stem = item.stem();
+      //   // Should conditionally classify the incoming words
+      //   // classIt(stem, )
+      // });
+      // twiml.message("you need something");
+    } else {
+      classifier.addDocument(msg, 'other');
+      classifier.train();
+      classifier.save('classifier.json', function(err, classifier) {
+        if (err) {
+          throw new Meteor.Error("couldn't save");
+          console.log('it didnt save')
+        } else {
+          return true;
+          console.log(classifier.docs);
+        }
+      });
+      // tokens.forEach(function(item) {
+      //   // let stem = item.stem();
+      //   // Should conditionally classify the incoming words
+      //   // classIt(stem, )
+      // });
+      // twiml.message("Try rephrasing that for me..");
+    }
+  },
+  classifyMessage: function (msg) {
+    let said = msg,
+        natural = require('natural'),
+        classifier = new natural.BayesClassifier(),
+        // classifier = new natural.LogisticRegressionClassifier(),
+        tokenizer = new natural.WordTokenizer(),
+        tokens = tokenizer.tokenize(said),
+        msgClass;
+
+    natural.PorterStemmer.attach();
+
+    natural.BayesClassifier.load('classifier.json', null, function(err, classifier) {
+      // console.log(classifier.classify(said));
+      if (err) {
+        console.log("classification lookup failed")
+      } else {
+        console.log(classifier.classify(said));
+        // resultClass = res.classify(said);
+        msgClass = classifier.classify(said);
+      }
+    });
+
+    return msgClass;
+
+    // Watch events? not working...
+    // classifier.events.on('trainedWithDocument', function (obj) {
+    //   // console.log(obj);
+    //   // {
+    //   //   total: 23 // There are 23 total documents being trained against
+    //   //   index: 12 // The index/number of the document that's just been trained against
+    //   //   doc: {...} // The document that has just been indexed
+    //   // }
+      
+    // });
+  },
+
   addGroup: function (name) {
     Groups.insert({
       name: name,
@@ -157,5 +303,5 @@ Meteor.startup(() => {
   }
 
   updateMessages();
-  Meteor.setInterval(updateMessages, 60000);
+  Meteor.setInterval(updateMessages, 10000);
 });

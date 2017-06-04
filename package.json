@@ -6,7 +6,11 @@
   },
   "dependencies": {
     "bcrypt": "^0.8.7",
+    "body-parser": "^1.17.2",
+    "lapack": "^0.1.0",
     "meteor-node-stubs": "~0.2.0",
-    "twilio": "^2.11.0"
+    "natural": "^0.5.1",
+    "twilio": "^2.11.0",
+    "wordnet-db": "^3.1.4"
   }
 }
